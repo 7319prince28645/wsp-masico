@@ -33,7 +33,7 @@ export default function Dashboard({ socket, isReady }: DashboardProps) {
       setLogs(prev => [`[${new Date().toLocaleTimeString()}] ${data.status}`, ...prev]);
         console.log(data)
       // Parse number from status string (to avoid server restart)
-      const match = data.status.match(/(?:Sent to|Skipped|Failed to) (\d+)(?:: (.+))?/);
+      const match = data.status.match(/(?:Sent to|Skipped|Failed to|Enviado a|Saltado|Fallo) (\d+)(?:: (.+))?/);
       if (match) {
         const number = match[1];
         const reason = match[2] || (data.success ? 'Enviado' : 'Error desconocido');

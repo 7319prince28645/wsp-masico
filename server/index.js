@@ -11,6 +11,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from the React client
+app.use(express.static(path.join(__dirname, "../client/dist")));
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -378,6 +381,11 @@ io.on("connection", (socket) => {
     // The client stays alive in 'sessions' map.
     // If the user comes back, they reconnect to the same session.
   });
+});
+
+// Handle React routing, return all requests to React app
+app.get(/.*/, (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist/index.html"));
 });
 
 const PORT = 3000;
