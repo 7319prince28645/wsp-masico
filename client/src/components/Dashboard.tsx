@@ -8,7 +8,7 @@ interface DashboardProps {
   isReady: boolean;
 }
 
-interface Progress {
+interface Progress {  
   current: number;
   total: number;
   status: string;
@@ -18,6 +18,7 @@ interface Progress {
 export default function Dashboard({ socket, isReady }: DashboardProps) {
   const [numbers, setNumbers] = useState('');
   const [message, setMessage] = useState('');
+  const [messageVariations, setMessageVariations] = useState('');
   const [sending, setSending] = useState(false);
   const [progress, setProgress] = useState<Progress | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
@@ -67,6 +68,17 @@ export default function Dashboard({ socket, isReady }: DashboardProps) {
       alert('Por favor ingrese números válidos');
       return;
     }
+    
+    // VALIDAR LÍMITE DE SEGURIDAD
+    if (numberList.length > 100) {
+      alert('⚠️ ADVERTENCIA: El límite es 100 mensajes por sesión para evitar bloqueos de WhatsApp.\n\nDivide tu lista en lotes más pequeños.');
+      return;
+    }
+    
+    // Preparar variaciones de mensaje
+    const variations = messageVariations.trim() 
+      ? messageVariations.split('\n---\n').map(v => v.trim()).filter(v => v.length > 0)
+      : [];
 
     setSending(true);
     setLogs([]);
@@ -78,7 +90,8 @@ export default function Dashboard({ socket, isReady }: DashboardProps) {
     // Use socket to send batch instead of REST API
     socket.emit('send_batch', {
       numbers: numberList,
-      message
+      message,
+      messageVariations: variations.length > 0 ? variations : null
     });
   };
 
@@ -122,25 +135,50 @@ export default function Dashboard({ socket, isReady }: DashboardProps) {
               value={numbers}
               onChange={(e) => setNumbers(e.target.value)}
               placeholder="999999999&#10;988888888"
-              className="w-full h-48 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none font-mono text-sm"
+              className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none font-mono text-sm"
               disabled={sending}
             />
             <p className="text-xs text-gray-500 mt-1">
               {numbers.split(/[\n,]+/).filter(n => n.trim().length > 0).length} números detectados
             </p>
+            {numbers.split(/[\n,]+/).filter(n => n.trim().length > 0).length > 100 && (
+              <p className="text-xs text-red-600 mt-1 font-semibold">
+                ⚠️ Límite excedido (máx: 100 por sesión)
+              </p>
+            )}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mensaje
+              Mensaje principal
+              <span className="ml-2 text-xs text-green-600">✨ Se agregará saludo automático</span>
             </label>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Hello! We invite you to the graduation ceremony..."
-              className="w-full h-48 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+              placeholder="Te invitamos a la ceremonia de graduación que se llevará a cabo el próximo viernes..."
+              className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
               disabled={sending}
             />
+            <p className="text-xs text-gray-500 mt-1">
+              💬 Se agregará automáticamente un saludo personalizado según la hora (Buenos días, Buenas tardes, etc.)
+            </p>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              🔒 Variaciones del mensaje (opcional - anti-ban)
+            </label>
+            <textarea
+              value={messageVariations}
+              onChange={(e) => setMessageVariations(e.target.value)}
+              placeholder="Hola! Cómo estás? Te escribo para invitarte...&#10;---&#10;Saludos! Quería compartirte esta información...&#10;---&#10;Hey! Espero que estés bien. Quiero contarte sobre..."
+              className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none text-xs"
+              disabled={sending}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Separa cada variación con "---" en una nueva línea. Se enviará aleatoriamente.
+            </p>
           </div>
         </div>
 

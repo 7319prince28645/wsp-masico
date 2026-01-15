@@ -1,0 +1,5 @@
+2026/01/14-10:14:54.547 62c8 Creating DB C:\Users\SENATI\Desktop\WSP\whatsapp-sender\server\.wwebjs_auth\session-43cc9o0jkwtmke5wo0y\Default\Local Storage\leveldb since it was missing.
+2026/01/14-10:14:54.621 62c8 Reusing MANIFEST C:\Users\SENATI\Desktop\WSP\whatsapp-sender\server\.wwebjs_auth\session-43cc9o0jkwtmke5wo0y\Default\Local Storage\leveldb/MANIFEST-000001
+2026/01/14-11:55:07.574 389c Level-0 table #5: started
+2026/01/14-11:55:07.587 389c Level-0 table #5: 18849 bytes OK
+2026/01/14-11:55:07.589 389c Delete type=0 #3
